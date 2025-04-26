@@ -1,0 +1,50 @@
+# https://taskfile.dev
+
+version: "3"
+
+vars:
+  GREETING: Hello, World!
+
+tasks:
+  pip:requirements:
+    desc: 安装 python 依赖
+    cmds:
+      - pip install -r requirements.txt --root-user-action=ignore
+
+  pdm:create:
+    desc: 创建 pdm 项目
+    cmds:
+      - |
+        if [ -d "tools/pdm" ]; then
+          echo "tools/pdm 目录已存在"
+          exit 1
+        fi
+        pdm new tools/pdm \
+          --non-interactive \
+          --license MIT \
+          --no-git \
+          --backend pdm-backend \
+          --name pypi-build-pdm \
+          --project-version {{.GIT_TAG_LATEST}}
+
+  pdm:publish:
+    desc: 发布 pdm 项目
+    cmds:
+      - |
+        if [ ! -d "tools/pdm" ]; then
+          echo "tools/pdm 目录不存在"
+          exit 1
+        fi
+        cd tools/pdm || exit 1
+        pdm publish
+
+  hatch:publish:
+    desc: "构建并上传"
+    cmds:
+      # - task git:tag:next
+      # https://twine-bhrutledge.readthedocs.io/en/stable/
+      - |
+        cd tools/hatch || exit 1
+        rm -rf dist/*
+        python3 -m build
+        python3 -m twine upload dist/*
