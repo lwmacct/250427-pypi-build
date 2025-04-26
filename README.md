@@ -9,3 +9,4 @@ task -a
 # Related Links
 - https://github.com/lwmacct
 - https://github.com/pdm-project/pdm
+- https://pypi.org/manage/projects/
